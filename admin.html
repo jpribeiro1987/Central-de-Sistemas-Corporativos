@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Administrativo - Portal de Acessos HSA</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      
+      --theme-blue: #2563eb;
+      --theme-sky: #0284c7;
+      --theme-teal: #0d9488;
+      --theme-indigo: #4f46e5;
+      --theme-violet: #7c3aed;
+      --theme-orange: #ea580c;
+      --theme-slate: #475569;
+      --theme-emerald: #059669;
+      --theme-rose: #e11d48;
+      --theme-amber: #d97706;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    /* Tela de Login */
+    #authOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 1rem;
+    }
+
+    .auth-card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 2.5rem;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      animation: popIn 0.3s ease-out;
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .auth-card img {
+      height: 52px;
+      margin-bottom: 1.25rem;
+      object-fit: contain;
+    }
+
+    .auth-card .lock-badge {
+      width: 56px;
+      height: 56px;
+      background: #e0f2fe;
+      color: #0284c7;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+
+    .auth-card h2 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 0.35rem;
+    }
+
+    .auth-card p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 1.75rem;
+    }
+
+    .password-field-wrapper {
+      position: relative;
+      margin-bottom: 1.25rem;
+      text-align: left;
+    }
+
+    .password-field-wrapper label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+      color: #334155;
+    }
+
+    .password-field-wrapper input {
+      width: 100%;
+      padding: 0.8rem 2.8rem 0.8rem 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-family: inherit;
+      background: #f8fafc;
+      transition: all 0.2s;
+    }
+
+    .password-field-wrapper input:focus {
+      outline: none;
+      border-color: #0284c7;
+      background: #ffffff;
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+    }
+
+    .toggle-pass-btn {
+      position: absolute;
+      right: 0.8rem;
+      top: 2.15rem;
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      color: #94a3b8;
+      display: flex;
+      align-items: center;
+    }
+
+    .toggle-pass-btn:hover {
+      color: #475569;
+    }
+
+    .auth-error {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #dc2626;
+      padding: 0.6rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+      display: none;
+      text-align: left;
+    }
+
+    .btn-login {
+      width: 100%;
+      background: #0284c7;
+      color: #ffffff;
+      border: none;
+      padding: 0.85rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: background 0.2s;
+    }
+
+    .btn-login:hover {
+      background: #0369a1;
+    }
+
+    .back-to-portal-link {
+      display: inline-block;
+      margin-top: 1.25rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .back-to-portal-link:hover {
+      color: #0284c7;
+      text-decoration: underline;
+    }
+
+    /* Conteúdo Principal do Painel */
+    #dashboardContent {
+      display: none;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* Top Bar */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .top-bar-title {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .top-bar-title img {
+      height: 48px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .top-bar-title h1 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: #1e293b;
+      letter-spacing: -0.025em;
+    }
+
+    .top-bar-title p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    .top-bar-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #ffffff;
+      color: #0284c7;
+      border: 1px solid #cbd5e1;
+      padding: 0.65rem 1.25rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    .nav-btn:hover {
+      background: #f0f9ff;
+      border-color: #0284c7;
+      transform: translateY(-1px);
+    }
+
+    .logout-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: #fff1f2;
+      color: #e11d48;
+      border: 1px solid #fecdd3;
+      padding: 0.65rem 1.1rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .logout-btn:hover {
+      background: #ffe4e6;
+      color: #be123c;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card-bg);
+      padding: 2rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+      margin-bottom: 2rem;
+    }
+
+    .card.highlight-card {
+      border-left: 4px solid #0284c7;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid #f1f5f9;
+      padding-bottom: 0.75rem;
+    }
+
+    .card-header h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .duty-badge {
+      font-size: 0.75rem;
+      background: #ecfdf5;
+      color: #059669;
+      border: 1px solid #a7f3d0;
+      padding: 0.25rem 0.65rem;
+      border-radius: 999px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
+    /* Form */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .form-group label {
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+      font-size: 0.875rem;
+      color: #334155;
+    }
+
+    .form-group input, 
+    .form-group select, 
+    .form-group textarea {
+      padding: 0.75rem 0.9rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      background-color: #f8fafc;
+      transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+    }
+
+    .form-group input:focus, 
+    .form-group select:focus, 
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #0284c7;
+      background-color: #ffffff;
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 85px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.85rem;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #1e293b;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .checkbox-label input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+
+    .icon-helper {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
+
+    .icon-preview-box {
+      width: 44px;
+      height: 44px;
+      border: 2px dashed #cbd5e1;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f8fafc;
+      color: #0284c7;
+      flex-shrink: 0;
+    }
+
+    .icon-preview-box svg {
+      width: 26px;
+      height: 26px;
+    }
+
+    .icon-tips {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+      grid-column: 1 / -1;
+    }
+
+    button {
+      padding: 0.75rem 1.75rem;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary { 
+      background: #0284c7; 
+      color: #fff; 
+    }
+    .btn-primary:hover { 
+      background: #0369a1; 
+      box-shadow: 0 2px 4px rgba(2, 132, 199, 0.3);
+    }
+
+    .btn-success { 
+      background: #059669; 
+      color: #fff; 
+    }
+    .btn-success:hover { 
+      background: #047857; 
+      box-shadow: 0 2px 4px rgba(5, 150, 105, 0.3);
+    }
+
+    .btn-secondary { 
+      background: #e2e8f0; 
+      color: #334155; 
+    }
+    .btn-secondary:hover { 
+      background: #cbd5e1; 
+    }
+
+    .btn-danger { 
+      background: #fee2e2; 
+      color: #dc2626; 
+      padding: 0.4rem 0.75rem; 
+      font-size: 0.85rem; 
+      border-radius: 4px;
+    }
+    .btn-danger:hover { 
+      background: #dc2626; 
+      color: #fff; 
+    }
+
+    .btn-edit { 
+      background: #fef3c7; 
+      color: #d97706; 
+      padding: 0.4rem 0.75rem; 
+      font-size: 0.85rem; 
+      margin-right: 0.4rem; 
+      border-radius: 4px;
+    }
+    .btn-edit:hover { 
+      background: #d97706; 
+      color: #fff; 
+    }
+
+    /* Presets dropdown */
+    .icon-presets {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 0.4rem;
+    }
+
+    .preset-pill {
+      font-size: 0.75rem;
+      background: #e0f2fe;
+      color: #0369a1;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      cursor: pointer;
+      border: 1px solid #bae6fd;
+      transition: background 0.15s;
+    }
+
+    .preset-pill:hover {
+      background: #bae6fd;
+    }
+
+    /* Table */
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th, td {
+      padding: 0.875rem 1rem;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: middle;
+    }
+
+    th {
+      background: #f8fafc;
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    td {
+      font-size: 0.925rem;
+    }
+
+    tbody tr:hover {
+      background-color: #f8fafc;
+    }
+
+    .theme-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.8rem;
+      font-weight: 500;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      background: #f1f5f9;
+      color: #334155;
+    }
+
+    .theme-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .theme-blue .theme-dot, .dot-theme-blue { background: #2563eb; }
+    .theme-sky .theme-dot, .dot-theme-sky { background: #0284c7; }
+    .theme-teal .theme-dot, .dot-theme-teal { background: #0d9488; }
+    .theme-indigo .theme-dot, .dot-theme-indigo { background: #4f46e5; }
+    .theme-violet .theme-dot, .dot-theme-violet { background: #7c3aed; }
+    .theme-orange .theme-dot, .dot-theme-orange { background: #ea580c; }
+    .theme-slate .theme-dot, .dot-theme-slate { background: #475569; }
+    .theme-emerald .theme-dot, .dot-theme-emerald { background: #059669; }
+    .theme-rose .theme-dot, .dot-theme-rose { background: #e11d48; }
+    .theme-amber .theme-dot, .dot-theme-amber { background: #d97706; }
+
+    .icon-preview svg {
+      width: 26px;
+      height: 26px;
+      display: block;
+      color: #0284c7;
+    }
+
+    .link-cell a {
+      color: #0284c7;
+      text-decoration: none;
+      word-break: break-all;
+      font-size: 0.85rem;
+    }
+
+    .link-cell a:hover {
+      text-decoration: underline;
+    }
+
+    /* Alert Banner */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: #1e293b;
+      color: #ffffff;
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+      font-size: 0.9rem;
+      display: none;
+      align-items: center;
+      gap: 0.5rem;
+      z-index: 1000;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Overlay de Autenticação / Senha -->
+  <div id="authOverlay">
+    <div class="auth-card">
+      <img src="hsa.png" alt="Hospital Santo Antônio" onerror="this.style.display='none'">
+      <div class="lock-badge">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+      </div>
+      <h2>Painel Administrativo</h2>
+      <p>Área restrita à equipe de TI. Digite a senha para gerenciar os acessos e a escala de plantão.</p>
+      
+      <form id="loginForm">
+        <div class="password-field-wrapper">
+          <label for="adminPassword">Senha de Acesso</label>
+          <input type="password" id="adminPassword" placeholder="Digite a senha..." required autofocus>
+          <button type="button" class="toggle-pass-btn" onclick="togglePasswordVisibility()" title="Mostrar/ocultar senha">
+            <svg id="eyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </button>
+        </div>
+
+        <div id="authError" class="auth-error">Senha incorreta.</div>
+
+        <button type="submit" class="btn-login" id="btnLogin">
+          <span>Entrar no Painel</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </button>
+      </form>
+
+      <a href="index.html" class="back-to-portal-link">← Voltar ao Portal Público</a>
+    </div>
+  </div>
+
+  <!-- Painel Principal Administrativo -->
+  <div id="dashboardContent">
+    <div class="container">
+      <div class="top-bar">
+        <div class="top-bar-title">
+          <img src="hsa.png" alt="Hospital Santo Antônio" onerror="this.style.display='none'">
+          <div>
+            <h1>Painel Administrativo</h1>
+            <p>Gerenciamento de Acessos e Escala de Plantão da TI</p>
+          </div>
+        </div>
+        <div class="top-bar-actions">
+          <a href="index.html" class="nav-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            Ver Portal de Links
+          </a>
+          <button type="button" class="logout-btn" onclick="logoutAdmin()" title="Sair do painel administrativo">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            Sair
+          </button>
+        </div>
+      </div>
+
+      <!-- Card de Escala de Plantão TI -->
+      <div class="card highlight-card">
+        <div class="card-header">
+          <h2>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            Escala de Plantão da T.I.
+          </h2>
+          <span class="duty-badge" id="dutyStatusBadge">Exibindo no Portal</span>
+        </div>
+
+        <form id="dutyForm">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="technician">Nome do Plantonista Titular *</label>
+              <input type="text" id="technician" required placeholder="Ex: Carlos Silva ou Gabriel Souza">
+            </div>
+
+            <div class="form-group">
+              <label for="phone">Telefone / WhatsApp de Contato *</label>
+              <input type="text" id="phone" required placeholder="Ex: (38) 99876-5432 ou Ramal 253">
+            </div>
+
+            <div class="form-group">
+              <label for="period">Período / Vigência do Plantão *</label>
+              <input type="text" id="period" required placeholder="Ex: 03/11 a 10/11 • Noturno e Finais de Semana">
+            </div>
+
+            <div class="form-group">
+              <label for="secondary">Plantonista Reserva / Apoio (Opcional)</label>
+              <input type="text" id="secondary" placeholder="Ex: Marcos Santos (Backup)">
+            </div>
+
+            <div class="form-group full-width">
+              <label for="notes">Instruções / Observações Adicionais</label>
+              <input type="text" id="notes" placeholder="Ex: Chamados de emergência e apoio aos setores assistenciais hospitalares">
+            </div>
+
+            <div class="form-group full-width">
+              <label class="checkbox-label" for="dutyActive">
+                <input type="checkbox" id="dutyActive" checked>
+                <span>Ativar exibição do plantonista no Portal Principal</span>
+              </label>
+            </div>
+
+            <div class="btn-group">
+              <button type="submit" class="btn-success" id="btnSaveDuty">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                <span>Atualizar Plantão da T.I.</span>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+      
+      <!-- Formulário de Cadastro/Edição de Links -->
+      <div class="card">
+        <div class="card-header">
+          <h2 id="formTitle">Novo Link</h2>
+          <span id="editingBadge" style="display:none; font-size: 0.8rem; background: #fef3c7; color: #b45309; padding: 0.2rem 0.6rem; border-radius: 4px; font-weight: 600;">Modo de Edição</span>
+        </div>
+        <form id="linkForm">
+          <input type="hidden" id="linkId">
+          
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="title">Título do Sistema *</label>
+              <input type="text" id="title" required placeholder="Ex: Sistema de Custos">
+            </div>
+            
+            <div class="form-group">
+              <label for="description">Descrição / Subtítulo</label>
+              <input type="text" id="description" placeholder="Ex: Gestão Financeira">
+            </div>
+            
+            <div class="form-group">
+              <label for="url">URL do Sistema (Link) *</label>
+              <input type="url" id="url" required placeholder="http://192.168.252.248:8083/">
+            </div>
+            
+            <div class="form-group">
+              <label for="theme">Tema (Cor do Botão) *</label>
+              <select id="theme" required>
+                <option value="theme-blue">Azul Escuro (TI)</option>
+                <option value="theme-sky">Azul Claro (Webmail)</option>
+                <option value="theme-teal">Verde Água (Custos)</option>
+                <option value="theme-indigo">Índigo (SPDATA)</option>
+                <option value="theme-violet">Roxo (DRG)</option>
+                <option value="theme-orange">Laranja (Coordenadores)</option>
+                <option value="theme-slate">Cinza Escuro (Radiologia)</option>
+                <option value="theme-emerald">Verde Esmeralda (Qualidade)</option>
+                <option value="theme-rose">Rosa/Vermelho (Compras)</option>
+                <option value="theme-amber">Âmbar/Amarelo (Indicadores)</option>
+              </select>
+            </div>
+            
+            <div class="form-group full-width">
+              <label for="icon">Ícone (Código SVG) *</label>
+              <textarea id="icon" required placeholder="Cole o código SVG aqui: <svg>...</svg>"></textarea>
+              
+              <div class="icon-helper">
+                <div class="icon-preview-box" id="iconLivePreview" title="Pré-visualização do Ícone">
+                  <span>?</span>
+                </div>
+                <div class="icon-tips">
+                  <span>Clique em um modelo para preencher rapidamente:</span>
+                  <div class="icon-presets">
+                    <span class="preset-pill" onclick="applyPreset('suporte')">Suporte / TI</span>
+                    <span class="preset-pill" onclick="applyPreset('mail')">Webmail</span>
+                    <span class="preset-pill" onclick="applyPreset('financeiro')">Financeiro / Moeda</span>
+                    <span class="preset-pill" onclick="applyPreset('hospital')">Prontuário / Saúde</span>
+                    <span class="preset-pill" onclick="applyPreset('seguranca')">Segurança / Escudo</span>
+                    <span class="preset-pill" onclick="applyPreset('grafico')">Gráfico / BI</span>
+                    <span class="preset-pill" onclick="applyPreset('compras')">Carrinho / Compras</span>
+                    <span class="preset-pill" onclick="applyPreset('imagem')">Imagens / Radiologia</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="btn-group">
+              <button type="submit" class="btn-primary" id="btnSubmit">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                <span>Salvar Link</span>
+              </button>
+              <button type="button" class="btn-secondary" onclick="resetForm()">
+                <span>Cancelar</span>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Tabela de Links -->
+      <div class="card">
+        <div class="card-header">
+          <h2>Links Cadastrados (<span id="linksCount">0</span>)</h2>
+          <button class="btn-secondary" onclick="fetchLinks()" style="padding: 0.35rem 0.75rem; font-size: 0.85rem;">
+            ↻ Atualizar Lista
+          </button>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 50px;">ID</th>
+                <th style="width: 60px;">Ícone</th>
+                <th>Título & Descrição</th>
+                <th>URL / Destino</th>
+                <th style="width: 140px;">Tema</th>
+                <th style="width: 170px;">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              <tr>
+                <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem;">Carregando links...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast">Mensagem</div>
+
+  <script>
+    const BASE_URL = window.location.origin.startsWith('http') ? '' : 'http://localhost:8090';
+    const API_URL = `${BASE_URL}/api/links`;
+    const PLANTAO_URL = `${BASE_URL}/api/plantao`;
+    const AUTH_URL = `${BASE_URL}/api/auth`;
+
+    const TOKEN_KEY = 'hsa_admin_token';
+    
+    // Obter token salvo da sessão
+    function getToken() {
+      return sessionStorage.getItem(TOKEN_KEY) || '';
+    }
+
+    function setToken(token) {
+      sessionStorage.setItem(TOKEN_KEY, token);
+    }
+
+    function clearToken() {
+      sessionStorage.removeItem(TOKEN_KEY);
+    }
+
+    // Alternar visualização da senha
+    function togglePasswordVisibility() {
+      const passInput = document.getElementById('adminPassword');
+      const eyeIcon = document.getElementById('eyeIcon');
+      if (passInput.type === 'password') {
+        passInput.type = 'text';
+        eyeIcon.innerHTML = `
+          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+          <line x1="1" y1="1" x2="23" y2="23"></line>
+        `;
+      } else {
+        passInput.type = 'password';
+        eyeIcon.innerHTML = `
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+          <circle cx="12" cy="12" r="3"></circle>
+        `;
+      }
+    }
+
+    // Formulário de Login
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const pass = document.getElementById('adminPassword').value;
+      const errorEl = document.getElementById('authError');
+      const btnLogin = document.getElementById('btnLogin');
+
+      errorEl.style.display = 'none';
+      btnLogin.disabled = true;
+      btnLogin.innerHTML = 'Validando...';
+
+      try {
+        const res = await fetch(`${AUTH_URL}/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: pass })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || 'Senha incorreta.');
+        }
+
+        // Salvar token e liberar painel
+        setToken(data.token);
+        document.getElementById('adminPassword').value = '';
+        showDashboard();
+        showToast('Login realizado com sucesso!');
+      } catch (err) {
+        errorEl.textContent = err.message;
+        errorEl.style.display = 'block';
+        document.getElementById('adminPassword').focus();
+      } finally {
+        btnLogin.disabled = false;
+        btnLogin.innerHTML = `
+          <span>Entrar no Painel</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        `;
+      }
+    });
+
+    async function checkAuthSession() {
+      const token = getToken();
+      if (!token) {
+        showLogin();
+        return;
+      }
+
+      try {
+        const res = await fetch(`${AUTH_URL}/verify`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (res.ok) {
+          showDashboard();
+        } else {
+          clearToken();
+          showLogin();
+        }
+      } catch (e) {
+        showLogin();
+      }
+    }
+
+    function showDashboard() {
+      document.getElementById('authOverlay').style.display = 'none';
+      document.getElementById('dashboardContent').style.display = 'block';
+      fetchLinks();
+      fetchPlantao();
+    }
+
+    function showLogin() {
+      document.getElementById('authOverlay').style.display = 'flex';
+      document.getElementById('dashboardContent').style.display = 'none';
+      document.getElementById('adminPassword').focus();
+    }
+
+    async function logoutAdmin() {
+      const token = getToken();
+      try {
+        await fetch(`${AUTH_URL}/logout`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+      } catch (e) {}
+      clearToken();
+      showLogin();
+      showToast('Sessão encerrada com sucesso.');
+    }
+
+    // ==================== GERENCIAMENTO DO PLANTÃO DA TI ====================
+
+    async function fetchPlantao() {
+      try {
+        const res = await fetch(PLANTAO_URL);
+        if (!res.ok) return;
+        const duty = await res.json();
+
+        if (duty) {
+          document.getElementById('technician').value = duty.technician || '';
+          document.getElementById('phone').value = duty.phone || '';
+          document.getElementById('period').value = duty.period || '';
+          document.getElementById('secondary').value = duty.secondary || '';
+          document.getElementById('notes').value = duty.notes || '';
+          
+          const isActive = duty.active === 1 || duty.active === true || duty.active === undefined;
+          document.getElementById('dutyActive').checked = isActive;
+          updateDutyStatusBadge(isActive);
+        }
+      } catch (err) {
+        console.error('Erro ao carregar dados do plantão:', err);
+      }
+    }
+
+    function updateDutyStatusBadge(active) {
+      const badge = document.getElementById('dutyStatusBadge');
+      if (active) {
+        badge.textContent = 'Exibindo no Portal';
+        badge.style.background = '#ecfdf5';
+        badge.style.color = '#059669';
+        badge.style.borderColor = '#a7f3d0';
+      } else {
+        badge.textContent = 'Oculto no Portal';
+        badge.style.background = '#fef2f2';
+        badge.style.color = '#dc2626';
+        badge.style.borderColor = '#fecaca';
+      }
+    }
+
+    document.getElementById('dutyActive').addEventListener('change', (e) => {
+      updateDutyStatusBadge(e.target.checked);
+    });
+
+    document.getElementById('dutyForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const token = getToken();
+      if (!token) {
+        showLogin();
+        return;
+      }
+
+      const payload = {
+        technician: document.getElementById('technician').value.trim(),
+        phone: document.getElementById('phone').value.trim(),
+        period: document.getElementById('period').value.trim(),
+        secondary: document.getElementById('secondary').value.trim(),
+        notes: document.getElementById('notes').value.trim(),
+        active: document.getElementById('dutyActive').checked ? 1 : 0
+      };
+
+      const btn = document.getElementById('btnSaveDuty');
+      btn.disabled = true;
+      btn.innerHTML = 'Salvando...';
+
+      try {
+        const res = await fetch(PLANTAO_URL, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (res.status === 401) {
+          clearToken();
+          showLogin();
+          alert('Sessão expirada. Faça login novamente.');
+          return;
+        }
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || 'Erro ao atualizar escala de plantão.');
+        }
+
+        showToast('Escala de Plantão atualizada com sucesso!');
+        updateDutyStatusBadge(payload.active === 1);
+      } catch (err) {
+        console.error(err);
+        alert('Erro ao salvar plantão: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+          <span>Atualizar Plantão da T.I.</span>
+        `;
+      }
+    });
+
+    // ==================== PRESETS DE ÍCONES ====================
+
+    const iconPresets = {
+      suporte: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>`,
+      mail: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><path d="M2 4l10 8 10-8"></path></svg>`,
+      financeiro: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="22"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>`,
+      hospital: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 17 22 12"></polyline></svg>`,
+      seguranca: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`,
+      grafico: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>`,
+      compras: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>`,
+      imagem: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>`
+    };
+
+    function applyPreset(type) {
+      if (iconPresets[type]) {
+        document.getElementById('icon').value = iconPresets[type];
+        updateIconPreview();
+      }
+    }
+
+    function updateIconPreview() {
+      const val = document.getElementById('icon').value.trim();
+      const previewBox = document.getElementById('iconLivePreview');
+      if (val.startsWith('<svg') && val.endsWith('</svg>')) {
+        previewBox.innerHTML = val;
+      } else {
+        previewBox.innerHTML = '<span>?</span>';
+      }
+    }
+
+    document.getElementById('icon').addEventListener('input', updateIconPreview);
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.style.display = 'flex';
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 3500);
+    }
+
+    // Submissão do formulário de link
+    document.getElementById('linkForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const token = getToken();
+      if (!token) {
+        showLogin();
+        return;
+      }
+
+      const id = document.getElementById('linkId').value;
+      const payload = {
+        title: document.getElementById('title').value.trim(),
+        description: document.getElementById('description').value.trim(),
+        url: document.getElementById('url').value.trim(),
+        theme: document.getElementById('theme').value,
+        icon: document.getElementById('icon').value.trim()
+      };
+
+      try {
+        const method = id ? 'PUT' : 'POST';
+        const endpoint = id ? `${API_URL}/${id}` : API_URL;
+        
+        const res = await fetch(endpoint, {
+          method: method,
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (res.status === 401) {
+          clearToken();
+          showLogin();
+          alert('Sessão expirada. Faça login novamente com a senha.');
+          return;
+        }
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || 'Erro ao processar requisição.');
+        }
+        
+        resetForm();
+        fetchLinks();
+        showToast(id ? 'Link atualizado com sucesso!' : 'Novo link adicionado com sucesso!');
+      } catch (error) {
+        console.error(error);
+        alert('Erro ao salvar: ' + error.message);
+      }
+    });
+
+    // Buscar Links e preencher tabela
+    async function fetchLinks() {
+      try {
+        const res = await fetch(API_URL);
+        if (!res.ok) throw new Error('Falha ao obter links da API.');
+        const links = await res.json();
+        
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+        document.getElementById('linksCount').textContent = links.length;
+
+        if (links.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: #64748b; padding: 2rem;">Nenhum link cadastrado no momento. Use o formulário acima para adicionar.</td></tr>`;
+          return;
+        }
+
+        links.forEach(link => {
+          const tr = document.createElement('tr');
+          
+          tr.innerHTML = `
+            <td><strong>#${link.id}</strong></td>
+            <td class="icon-preview">${link.icon || ''}</td>
+            <td>
+              <strong style="color: #1e293b;">${escapeHtml(link.title)}</strong>
+              ${link.description ? `<br><small style="color: #64748b;">${escapeHtml(link.description)}</small>` : ''}
+            </td>
+            <td class="link-cell">
+              <a href="${link.url}" target="_blank" rel="noopener noreferrer">${escapeHtml(link.url)}</a>
+            </td>
+            <td>
+              <span class="theme-badge ${link.theme}">
+                <span class="theme-dot dot-${link.theme}"></span>
+                ${link.theme.replace('theme-', '')}
+              </span>
+            </td>
+            <td>
+              <button class="btn-edit" onclick='editLink(${JSON.stringify(link).replace(/'/g, "&#39;")})'>Editar</button>
+              <button class="btn-danger" onclick="deleteLink(${link.id})">Excluir</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (error) {
+        console.error(error);
+        document.getElementById('tableBody').innerHTML = `<tr><td colspan="6" style="text-align:center; color:#ef4444; padding: 2rem;"><strong>Erro de comunicação com o servidor.</strong><br><small>Certifique-se de executar o servidor Node.js.</small></td></tr>`;
+      }
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.innerText = text;
+      return div.innerHTML;
+    }
+
+    // Preencher formulário para edição de link
+    function editLink(link) {
+      document.getElementById('formTitle').innerText = `Editando: ${link.title}`;
+      document.getElementById('editingBadge').style.display = 'inline-block';
+      document.getElementById('btnSubmit').innerHTML = `
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+        <span>Atualizar Link</span>
+      `;
+      
+      document.getElementById('linkId').value = link.id;
+      document.getElementById('title').value = link.title;
+      document.getElementById('description').value = link.description || '';
+      document.getElementById('url').value = link.url;
+      document.getElementById('theme').value = link.theme;
+      document.getElementById('icon').value = link.icon;
+      
+      updateIconPreview();
+      window.scrollTo({ top: document.getElementById('linkForm').offsetTop - 40, behavior: 'smooth' });
+    }
+
+    // Excluir Link
+    async function deleteLink(id) {
+      const token = getToken();
+      if (!token) {
+        showLogin();
+        return;
+      }
+
+      if (!confirm(`Tem certeza que deseja excluir o link #${id}? O botão não será mais exibido no portal público.`)) {
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_URL}/${id}`, { 
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (res.status === 401) {
+          clearToken();
+          showLogin();
+          alert('Sessão expirada. Faça login novamente com a senha.');
+          return;
+        }
+
+        if (!res.ok) throw new Error('Erro ao excluir no servidor.');
+        fetchLinks();
+        showToast('Link excluído com sucesso.');
+      } catch (error) {
+        console.error(error);
+        alert('Erro ao excluir link: ' + error.message);
+      }
+    }
+
+    // Limpar formulário de link
+    function resetForm() {
+      document.getElementById('linkForm').reset();
+      document.getElementById('linkId').value = '';
+      document.getElementById('formTitle').innerText = 'Novo Link';
+      document.getElementById('editingBadge').style.display = 'none';
+      document.getElementById('btnSubmit').innerHTML = `
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+        <span>Salvar Link</span>
+      `;
+      updateIconPreview();
+    }
+
+    // Verificar sessão ao carregar a página
+    document.addEventListener('DOMContentLoaded', checkAuthSession);
+  </script>
+</body>
+</html>

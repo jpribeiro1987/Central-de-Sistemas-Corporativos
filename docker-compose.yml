@@ -1,0 +1,12 @@
+services:
+  portal-hsa:
+    build: .
+    container_name: portal-acessos-hsa
+    restart: always
+    ports:
+      - "8090:8090"
+    environment:
+      - PORT=8090
+      - ADMIN_PASSWORD=hsaspd
+    volumes:
+      - ./database.sqlite:/app/database.sqlite
