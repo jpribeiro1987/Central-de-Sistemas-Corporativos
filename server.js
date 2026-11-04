@@ -90,6 +90,51 @@ const db = new sqlite3.Database(dbPath, (err) => {
   }
 });
 
+// Helper de Data Local (Horário de Brasília UTC-3)
+function getTodayLocalDate() {
+  const now = new Date();
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Sao_Paulo',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  });
+  return formatter.format(now); // Retorna 'YYYY-MM-DD'
+}
+
+// Formatar data 'YYYY-MM-DD' para 'DD/MM/YYYY'
+function formatDateBR(dateStr) {
+  if (!dateStr) return '';
+  const parts = dateStr.split('-');
+  if (parts.length === 3) {
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  }
+  return dateStr;
+}
+
+// Calcular diferença em dias entre duas datas (YYYY-MM-DD)
+function calculateDaysDiff(date1Str, date2Str) {
+  if (!date1Str || !date2Str) return 0;
+  const d1 = new Date(date1Str + 'T00:00:00');
+  const d2 = new Date(date2Str + 'T00:00:00');
+  const diffMs = d2 - d1;
+  return Math.round(diffMs / (1000 * 60 * 60 * 24));
+}
+
+// Determinar status do plantão em relação à data atual
+function calculateShiftStatus(shift, todayStr) {
+  if (shift.active === 0 || shift.active === false) return 'inativo';
+  if (!shift.start_date || !shift.end_date) return 'vigente';
+  
+  if (todayStr >= shift.start_date && todayStr <= shift.end_date) {
+    return 'vigente';
+  } else if (todayStr < shift.start_date) {
+    return 'agendado';
+  } else {
+    return 'vencido';
+  }
+}
+
 // Criação das tabelas e Carga Inicial
 function initDB() {
   // 1. Tabela de Links
@@ -137,15 +182,18 @@ function initDB() {
     });
   });
 
-  // 2. Tabela de Escala de Plantão TI
+  // 2. Tabela de Escala de Plantão TI com Suporte a Período de Datas
   db.run(`CREATE TABLE IF NOT EXISTS plantao (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     technician TEXT NOT NULL,
     phone TEXT,
+    start_date TEXT,
+    end_date TEXT,
     period TEXT,
     secondary TEXT,
     notes TEXT,
     active INTEGER DEFAULT 1,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`, (err) => {
     if (err) {
@@ -153,14 +201,40 @@ function initDB() {
       return;
     }
 
+    // Migração de schema: adicionar colunas start_date, end_date e created_at caso não existam
+    db.all('PRAGMA table_info(plantao)', (err, columns) => {
+      if (!err && columns) {
+        const colNames = columns.map(c => c.name);
+        if (!colNames.includes('start_date')) {
+          db.run('ALTER TABLE plantao ADD COLUMN start_date TEXT');
+        }
+        if (!colNames.includes('end_date')) {
+          db.run('ALTER TABLE plantao ADD COLUMN end_date TEXT');
+        }
+        if (!colNames.includes('created_at')) {
+          db.run('ALTER TABLE plantao ADD COLUMN created_at DATETIME');
+        }
+
+        // Se houver registro legado sem start_date/end_date, configurar com base no período atual
+        db.get('SELECT id, technician, start_date, end_date FROM plantao ORDER BY id ASC LIMIT 1', (err, row) => {
+          if (!err && row && (!row.start_date || !row.end_date)) {
+            db.run(`UPDATE plantao SET start_date = '2026-11-03', end_date = '2026-11-10' WHERE id = ?`, [row.id]);
+          }
+        });
+      }
+    });
+
     db.get('SELECT COUNT(*) as count FROM plantao', (err, row) => {
       if (!err && row && row.count === 0) {
         console.log('Inserindo plantão padrão da T.I...');
+        const today = getTodayLocalDate();
         db.run(
-          `INSERT INTO plantao (technician, phone, period, secondary, notes, active) VALUES (?, ?, ?, ?, ?, ?)`,
+          `INSERT INTO plantao (technician, phone, start_date, end_date, period, secondary, notes, active) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             'Plantão T.I. Hospitalar',
             '(38) 99999-0000',
+            today,
+            today,
             'Plantão Noturno e Fins de Semana',
             'Ramal Interno 253',
             'Acionamento exclusivo para urgências e sistemas assistenciais',
@@ -174,59 +248,243 @@ function initDB() {
 
 // ==================== ROTAS DE ESCALA DE PLANTÃO ====================
 
-// LER Plantão Ativo (Público - para exibição no portal)
+// LER Plantão Ativo de Hoje (Público - para exibição no portal principal)
+// Seleciona automaticamente o plantonista da data atual!
 app.get('/api/plantao', (req, res) => {
-  db.get('SELECT * FROM plantao ORDER BY id DESC LIMIT 1', [], (err, row) => {
+  const today = getTodayLocalDate();
+
+  // 1. Buscar plantão ativo onde a data de hoje está entre o início e o fim (inclusive)
+  const sqlCurrent = `SELECT * FROM plantao 
+    WHERE active = 1 
+      AND (start_date IS NULL OR start_date <= ?) 
+      AND (end_date IS NULL OR end_date >= ?)
+    ORDER BY 
+      CASE WHEN start_date IS NOT NULL THEN start_date ELSE '1970-01-01' END DESC,
+      id DESC 
+    LIMIT 1`;
+
+  db.get(sqlCurrent, [today, today], (err, current) => {
     if (err) return res.status(500).json({ error: err.message });
-    if (!row) {
+
+    // Buscar o próximo plantão agendado futuro
+    const sqlNext = `SELECT * FROM plantao 
+      WHERE active = 1 AND start_date > ? 
+      ORDER BY start_date ASC, id ASC 
+      LIMIT 1`;
+
+    db.get(sqlNext, [today], (errNext, nextPlantao) => {
+      if (errNext) console.error('Erro ao buscar próximo plantão:', errNext);
+
+      if (current) {
+        const daysRemaining = current.end_date ? calculateDaysDiff(today, current.end_date) : null;
+        return res.json({
+          ...current,
+          active: 1,
+          is_current: true,
+          today,
+          status: 'vigente',
+          days_remaining: daysRemaining,
+          next: nextPlantao || null
+        });
+      }
+
+      // Se nenhum plantão está vigente hoje (expirou ou não agendado para hoje)
       return res.json({
         active: 0,
-        technician: 'Nenhum plantonista configurado',
-        phone: '',
-        period: '',
+        is_current: false,
+        today,
+        technician: nextPlantao ? `Próximo: ${nextPlantao.technician}` : 'Nenhum plantonista em escala hoje',
+        phone: nextPlantao ? nextPlantao.phone : '',
+        period: nextPlantao ? `Início em ${formatDateBR(nextPlantao.start_date)}` : '',
         secondary: '',
-        notes: ''
+        notes: nextPlantao 
+          ? `Plantão anterior encerrado. Próximo início previsto para ${formatDateBR(nextPlantao.start_date)}. Em emergências, acione o Ramal 253.`
+          : 'Nenhum plantão ativo no momento. Em emergências, contate a Coordenação de T.I. no Ramal 253.',
+        status: 'sem_escala',
+        next: nextPlantao || null
       });
-    }
-    res.json(row);
+    });
   });
 });
 
-// ATUALIZAR Plantão (Protegido por Senha)
+// LISTAR Todas as Escalas de Plantão (Pública/Admin - com status de cada uma)
+app.get('/api/plantoes', (req, res) => {
+  const today = getTodayLocalDate();
+  const sql = `SELECT * FROM plantao ORDER BY 
+    CASE 
+      WHEN active = 1 AND (start_date IS NULL OR start_date <= '${today}') AND (end_date IS NULL OR end_date >= '${today}') THEN 1
+      WHEN active = 1 AND start_date > '${today}' THEN 2
+      WHEN active = 1 AND end_date < '${today}' THEN 3
+      ELSE 4
+    END ASC,
+    start_date DESC,
+    id DESC`;
+
+  db.all(sql, [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+
+    const items = rows.map(row => {
+      const status = calculateShiftStatus(row, today);
+      const daysRemaining = row.end_date ? calculateDaysDiff(today, row.end_date) : null;
+      const daysUntilStart = row.start_date ? calculateDaysDiff(today, row.start_date) : null;
+      return {
+        ...row,
+        status,
+        days_remaining: daysRemaining,
+        days_until_start: daysUntilStart
+      };
+    });
+
+    res.json({
+      today,
+      total: items.length,
+      current_count: items.filter(i => i.status === 'vigente').length,
+      scheduled_count: items.filter(i => i.status === 'agendado').length,
+      expired_count: items.filter(i => i.status === 'vencido').length,
+      inactive_count: items.filter(i => i.status === 'inativo').length,
+      items
+    });
+  });
+});
+
+// CRIAR Nova Escala de Plantão (Protegido por Senha)
+app.post('/api/plantao', requireAdminAuth, (req, res) => {
+  const { technician, phone, start_date, end_date, period, secondary, notes, active } = req.body;
+
+  if (!technician || !technician.trim()) {
+    return res.status(400).json({ error: 'O nome do técnico plantonista é obrigatório.' });
+  }
+  if (!phone || !phone.trim()) {
+    return res.status(400).json({ error: 'O telefone/WhatsApp de contato é obrigatório.' });
+  }
+  if (!start_date || !end_date) {
+    return res.status(400).json({ error: 'As datas de início e fim do plantão são obrigatórias.' });
+  }
+  if (start_date > end_date) {
+    return res.status(400).json({ error: 'A data de início não pode ser maior que a data de término.' });
+  }
+
+  const isActive = active === false || active === 0 ? 0 : 1;
+  const formattedPeriod = period && period.trim() ? period.trim() : `${formatDateBR(start_date)} a ${formatDateBR(end_date)}`;
+
+  const sql = `INSERT INTO plantao (technician, phone, start_date, end_date, period, secondary, notes, active, created_at, updated_at) 
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`;
+
+  db.run(sql, [technician.trim(), phone.trim(), start_date, end_date, formattedPeriod, secondary ? secondary.trim() : '', notes ? notes.trim() : '', isActive], function(err) {
+    if (err) return res.status(500).json({ error: err.message });
+    res.status(201).json({
+      success: true,
+      id: this.lastID,
+      message: 'Escala de plantão cadastrada com sucesso!'
+    });
+  });
+});
+
+// ATUALIZAR Plantão por ID (Protegido por Senha)
+app.put('/api/plantao/:id', requireAdminAuth, (req, res) => {
+  const { technician, phone, start_date, end_date, period, secondary, notes, active } = req.body;
+  const id = req.params.id;
+
+  if (!technician || !technician.trim()) {
+    return res.status(400).json({ error: 'O nome do técnico plantonista é obrigatório.' });
+  }
+  if (!phone || !phone.trim()) {
+    return res.status(400).json({ error: 'O telefone/WhatsApp de contato é obrigatório.' });
+  }
+  if (!start_date || !end_date) {
+    return res.status(400).json({ error: 'As datas de início e fim do plantão são obrigatórias.' });
+  }
+  if (start_date > end_date) {
+    return res.status(400).json({ error: 'A data de início não pode ser maior que a data de término.' });
+  }
+
+  const isActive = active === false || active === 0 ? 0 : 1;
+  const formattedPeriod = period && period.trim() ? period.trim() : `${formatDateBR(start_date)} a ${formatDateBR(end_date)}`;
+
+  const sql = `UPDATE plantao SET 
+    technician = ?, 
+    phone = ?, 
+    start_date = ?, 
+    end_date = ?, 
+    period = ?, 
+    secondary = ?, 
+    notes = ?, 
+    active = ?, 
+    updated_at = CURRENT_TIMESTAMP 
+    WHERE id = ?`;
+
+  db.run(sql, [technician.trim(), phone.trim(), start_date, end_date, formattedPeriod, secondary ? secondary.trim() : '', notes ? notes.trim() : '', isActive, id], function(err) {
+    if (err) return res.status(500).json({ error: err.message });
+    if (this.changes === 0) return res.status(404).json({ error: 'Plantão não encontrado.' });
+    res.json({ success: true, message: 'Escala de plantão atualizada com sucesso!' });
+  });
+});
+
+// ATUALIZAR Plantão Genérico (Compatibilidade com chamadas sem :id)
 app.put('/api/plantao', requireAdminAuth, (req, res) => {
-  const { technician, phone, period, secondary, notes, active } = req.body;
+  const { id, technician, phone, start_date, end_date, period, secondary, notes, active } = req.body;
 
   if (!technician) {
     return res.status(400).json({ error: 'O nome do plantonista é obrigatório.' });
   }
 
   const isActive = active === false || active === 0 ? 0 : 1;
+  const targetId = id || null;
 
-  db.get('SELECT id FROM plantao ORDER BY id DESC LIMIT 1', [], (err, row) => {
+  const doUpdate = (plantaoId) => {
+    const formattedPeriod = period && period.trim() ? period.trim() : (start_date && end_date ? `${formatDateBR(start_date)} a ${formatDateBR(end_date)}` : '');
+    const sql = `UPDATE plantao SET 
+      technician = ?, 
+      phone = ?, 
+      start_date = COALESCE(?, start_date), 
+      end_date = COALESCE(?, end_date), 
+      period = ?, 
+      secondary = ?, 
+      notes = ?, 
+      active = ?, 
+      updated_at = CURRENT_TIMESTAMP 
+      WHERE id = ?`;
+
+    db.run(sql, [technician, phone || '', start_date || null, end_date || null, formattedPeriod, secondary || '', notes || '', isActive, plantaoId], function(err) {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ success: true, message: 'Escala de plantão atualizada com sucesso!' });
+    });
+  };
+
+  if (targetId) {
+    doUpdate(targetId);
+  } else {
+    db.get('SELECT id FROM plantao ORDER BY id DESC LIMIT 1', [], (err, row) => {
+      if (err) return res.status(500).json({ error: err.message });
+      if (row) {
+        doUpdate(row.id);
+      } else {
+        const today = getTodayLocalDate();
+        const sql = `INSERT INTO plantao (technician, phone, start_date, end_date, period, secondary, notes, active) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+        db.run(sql, [technician, phone || '', start_date || today, end_date || today, period || '', secondary || '', notes || '', isActive], function(err) {
+          if (err) return res.status(500).json({ error: err.message });
+          res.json({ success: true, message: 'Escala de plantão cadastrada com sucesso!' });
+        });
+      }
+    });
+  }
+});
+
+// EXCLUIR Escala de Plantão (Protegido por Senha)
+app.delete('/api/plantao/:id', requireAdminAuth, (req, res) => {
+  db.run(`DELETE FROM plantao WHERE id = ?`, [req.params.id], function(err) {
     if (err) return res.status(500).json({ error: err.message });
+    if (this.changes === 0) return res.status(404).json({ error: 'Plantão não encontrado.' });
+    res.json({ success: true, message: 'Escala de plantão excluída com sucesso!' });
+  });
+});
 
-    if (row) {
-      const sql = `UPDATE plantao SET 
-        technician = ?, 
-        phone = ?, 
-        period = ?, 
-        secondary = ?, 
-        notes = ?, 
-        active = ?, 
-        updated_at = CURRENT_TIMESTAMP 
-        WHERE id = ?`;
-
-      db.run(sql, [technician, phone || '', period || '', secondary || '', notes || '', isActive, row.id], function(err) {
-        if (err) return res.status(500).json({ error: err.message });
-        res.json({ success: true, message: 'Escala de plantão atualizada com sucesso!' });
-      });
-    } else {
-      const sql = `INSERT INTO plantao (technician, phone, period, secondary, notes, active) VALUES (?, ?, ?, ?, ?, ?)`;
-      db.run(sql, [technician, phone || '', period || '', secondary || '', notes || '', isActive], function(err) {
-        if (err) return res.status(500).json({ error: err.message });
-        res.json({ success: true, message: 'Escala de plantão cadastrada com sucesso!' });
-      });
-    }
+// ALTERAR Status Ativo/Inativo do Plantão (Protegido por Senha)
+app.patch('/api/plantao/:id/toggle', requireAdminAuth, (req, res) => {
+  db.run(`UPDATE plantao SET active = CASE WHEN active = 1 THEN 0 ELSE 1 END, updated_at = CURRENT_TIMESTAMP WHERE id = ?`, [req.params.id], function(err) {
+    if (err) return res.status(500).json({ error: err.message });
+    if (this.changes === 0) return res.status(404).json({ error: 'Plantão não encontrado.' });
+    res.json({ success: true, message: 'Status do plantão alterado com sucesso!' });
   });
 });
 
@@ -286,6 +544,7 @@ app.listen(PORT, () => {
   console.log(` Painel Administrativo:  http://localhost:${PORT}/admin`);
   console.log(` Senha do Admin:        ${ADMIN_PASSWORD}`);
   console.log(` API Endpoint:          http://localhost:${PORT}/api/links`);
-  console.log(` API Plantão:           http://localhost:${PORT}/api/plantao`);
+  console.log(` API Plantão (Hoje):    http://localhost:${PORT}/api/plantao`);
+  console.log(` API Plantões (Lista):  http://localhost:${PORT}/api/plantoes`);
   console.log(`======================================================\n`);
 });

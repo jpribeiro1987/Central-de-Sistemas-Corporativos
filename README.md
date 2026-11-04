@@ -66,7 +66,19 @@ node server.js
 * **Portal Público de Acessos:** [http://localhost:8090](http://localhost:8090)
 * **Painel Administrativo:** [http://localhost:8090/admin](http://localhost:8090/admin) (Senha: `hsaspd`)
 * **API de Links:** [http://localhost:8090/api/links](http://localhost:8090/api/links)
-* **API do Plantão:** [http://localhost:8090/api/plantao](http://localhost:8090/api/plantao)
+* **API do Plantão (Vigente Hoje):** [http://localhost:8090/api/plantao](http://localhost:8090/api/plantao)
+* **API de Escalas (Histórico e Futuros):** [http://localhost:8090/api/plantoes](http://localhost:8090/api/plantoes)
+
+---
+
+## 📅 Escala de Plantão da T.I. com Troca Automática
+
+O sistema gerencia de forma inteligente a escala de plantonistas da T.I.:
+* **Cadastro de Técnicos e Períodos:** O administrador agenda os técnicos informando a data de início e a data de término do plantão.
+* **Transição 100% Automática:** O backend identifica em tempo real a data atual (Horário de Brasília) e seleciona automaticamente o técnico cuja escala está em vigor.
+* **Vencimento Automático:** Assim que o plantão atinge a data de término, o sistema passa a exibir automaticamente o próximo plantonista agendado, sem necessidade de qualquer alteração manual.
+* **Contador de Dias e Status:** No painel e no portal são exibidos alertas em tempo real ("Vence em X dias", "Vence hoje!", "Vence amanhã", "Agendado", "Vencido").
+* **Histórico Completo:** Gestão completa no Painel Administrativo com edição rápida, exclusão e alternância de ativação.
 
 ---
 

@@ -338,6 +338,277 @@
       font-weight: 700;
       letter-spacing: 0.02em;
       text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    @keyframes pulseGreen {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.6; }
+    }
+
+    .pulse-dot-green {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10b981;
+      animation: pulseGreen 1.8s infinite;
+      display: inline-block;
+    }
+
+    /* Badges de Status da Escala */
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .status-pill.vigente {
+      background: #ecfdf5;
+      color: #047857;
+      border: 1px solid #a7f3d0;
+    }
+
+    .status-pill.agendado {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+    }
+
+    .status-pill.vencido {
+      background: #f1f5f9;
+      color: #64748b;
+      border: 1px solid #cbd5e1;
+    }
+
+    .status-pill.inativo {
+      background: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+    }
+
+    /* Box de Plantão em Tempo Real */
+    .duty-live-box {
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+      border: 1px solid #cbd5e1;
+      transition: all 0.2s ease;
+    }
+
+    .duty-live-box.active-duty {
+      background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+      border-color: #86efac;
+      box-shadow: 0 4px 12px -2px rgba(16, 185, 129, 0.12);
+    }
+
+    .duty-live-box.no-duty {
+      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+      border-color: #fde68a;
+      box-shadow: 0 4px 12px -2px rgba(245, 158, 11, 0.12);
+    }
+
+    .duty-live-content {
+      display: flex;
+      align-items: center;
+      gap: 1.1rem;
+      flex: 1;
+      min-width: 280px;
+    }
+
+    .duty-live-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      flex-shrink: 0;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .active-duty .duty-live-avatar {
+      background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    }
+
+    .no-duty .duty-live-avatar {
+      background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+    }
+
+    .duty-live-avatar svg {
+      width: 26px;
+      height: 26px;
+    }
+
+    .duty-live-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .active-duty .duty-live-title { color: #047857; }
+    .no-duty .duty-live-title { color: #b45309; }
+
+    .duty-live-name {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.25;
+    }
+
+    .duty-live-meta {
+      font-size: 0.85rem;
+      color: #475569;
+      margin-top: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      flex-wrap: wrap;
+    }
+
+    .duty-live-meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .duty-live-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    .duty-whatsapp-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: #059669;
+      color: #ffffff;
+      padding: 0.55rem 1rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .duty-whatsapp-btn:hover {
+      background: #047857;
+      transform: translateY(-1px);
+    }
+
+    /* Mini Grid de Estatísticas do Plantão */
+    .duty-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .duty-stat-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      text-align: center;
+      transition: all 0.15s;
+    }
+
+    .duty-stat-card:hover {
+      background: #ffffff;
+      border-color: #cbd5e1;
+    }
+
+    .duty-stat-num {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.1;
+    }
+
+    .duty-stat-lbl {
+      font-size: 0.725rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-top: 0.2rem;
+    }
+
+    /* Atalhos Rápidos de Datas */
+    .date-preset-pills {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      margin-top: 0.4rem;
+    }
+
+    .date-preset-btn {
+      font-size: 0.75rem;
+      background: #f1f5f9;
+      color: #334155;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      border: 1px solid #cbd5e1;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.15s ease;
+    }
+
+    .date-preset-btn:hover {
+      background: #e0f2fe;
+      color: #0284c7;
+      border-color: #bae6fd;
+    }
+
+    /* Banner de Modo Edição de Plantão */
+    .duty-edit-indicator {
+      background: #fef3c7;
+      border: 1px solid #fde68a;
+      color: #92400e;
+      padding: 0.65rem 1rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .btn-toggle-active {
+      background: #f1f5f9;
+      color: #475569;
+      padding: 0.4rem 0.65rem;
+      font-size: 0.8rem;
+      border-radius: 4px;
+      border: 1px solid #cbd5e1;
+    }
+
+    .btn-toggle-active:hover {
+      background: #e2e8f0;
+      color: #1e293b;
     }
 
     /* Form */
@@ -719,51 +990,170 @@
             </svg>
             Escala de Plantão da T.I.
           </h2>
-          <span class="duty-badge" id="dutyStatusBadge">Exibindo no Portal</span>
+          <span class="duty-badge" id="dutyStatusBadge">
+            <span class="pulse-dot-green"></span>
+            <span>Troca Automática por Data</span>
+          </span>
         </div>
 
+        <!-- Box de Status em Tempo Real (Quem está de plantão HOJE) -->
+        <div id="dutyLiveBox" class="duty-live-box active-duty">
+          <div class="duty-live-content">
+            <div class="duty-live-avatar" id="dutyLiveAvatar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </div>
+            <div>
+              <div class="duty-live-title" id="dutyLiveTitle">● Plantonista Ativo Hoje no Portal</div>
+              <div class="duty-live-name" id="dutyLiveName">Carregando plantonista...</div>
+              <div class="duty-live-meta" id="dutyLiveMeta">
+                <span id="dutyLivePeriod">Período: --</span>
+                <span id="dutyLivePhone">Contato: --</span>
+                <span id="dutyLiveSecondary"></span>
+              </div>
+            </div>
+          </div>
+          <div class="duty-live-actions" id="dutyLiveActions">
+            <a href="#" id="dutyLiveWhatsApp" target="_blank" rel="noopener noreferrer" class="duty-whatsapp-btn" style="display:none;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+              <span>Abrir WhatsApp</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Mini Contadores -->
+        <div class="duty-stats-grid">
+          <div class="duty-stat-card">
+            <div class="duty-stat-num" id="statDutyTotal">0</div>
+            <div class="duty-stat-lbl">Total Cadastrados</div>
+          </div>
+          <div class="duty-stat-card" style="border-bottom: 3px solid #10b981;">
+            <div class="duty-stat-num" style="color: #059669;" id="statDutyCurrent">0</div>
+            <div class="duty-stat-lbl">Vigente Hoje</div>
+          </div>
+          <div class="duty-stat-card" style="border-bottom: 3px solid #3b82f6;">
+            <div class="duty-stat-num" style="color: #2563eb;" id="statDutyScheduled">0</div>
+            <div class="duty-stat-lbl">Agendados (Futuros)</div>
+          </div>
+          <div class="duty-stat-card" style="border-bottom: 3px solid #94a3b8;">
+            <div class="duty-stat-num" style="color: #64748b;" id="statDutyExpired">0</div>
+            <div class="duty-stat-lbl">Histórico / Vencidos</div>
+          </div>
+        </div>
+
+        <!-- Aviso em Modo de Edição -->
+        <div id="dutyEditNotice" class="duty-edit-indicator" style="display: none;">
+          <span id="dutyEditNoticeText">Você está editando um plantão existente.</span>
+          <button type="button" class="date-preset-btn" onclick="cancelDutyEdit()" style="background:#ffffff; border-color:#d97706; color:#92400e;">
+            ✕ Cancelar Edição
+          </button>
+        </div>
+
+        <!-- Formulário de Cadastro / Edição da Escala -->
         <form id="dutyForm">
+          <input type="hidden" id="dutyId">
+
           <div class="form-grid">
+            <div class="form-group full-width">
+              <h3 id="dutyFormTitle" style="font-size: 1.05rem; font-weight: 700; color: #1e293b; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.5rem;">
+                ➕ Cadastrar Novo Plantão na Escala
+              </h3>
+            </div>
+
             <div class="form-group">
-              <label for="technician">Nome do Plantonista Titular *</label>
-              <input type="text" id="technician" required placeholder="Ex: Carlos Silva ou Gabriel Souza">
+              <label for="technician">Nome do Técnico Plantonista *</label>
+              <input type="text" id="technician" required placeholder="Ex: Matheus Silva ou Gabriel Souza">
             </div>
 
             <div class="form-group">
               <label for="phone">Telefone / WhatsApp de Contato *</label>
-              <input type="text" id="phone" required placeholder="Ex: (38) 99876-5432 ou Ramal 253">
+              <input type="text" id="phone" required placeholder="Ex: (38) 99971-3071 ou Ramal 253">
             </div>
 
             <div class="form-group">
-              <label for="period">Período / Vigência do Plantão *</label>
-              <input type="text" id="period" required placeholder="Ex: 03/11 a 10/11 • Noturno e Finais de Semana">
+              <label for="startDate">Data de Início do Plantão *</label>
+              <input type="date" id="startDate" required>
+            </div>
+
+            <div class="form-group">
+              <label for="endDate">Data de Término / Vencimento *</label>
+              <input type="date" id="endDate" required>
+              <div class="date-preset-pills">
+                <span style="font-size: 0.725rem; color: #64748b; font-weight: 600; display: flex; align-items: center;">Atalhos:</span>
+                <button type="button" class="date-preset-btn" onclick="applyDatePreset('week_now')">7 Dias a partir de Hoje</button>
+                <button type="button" class="date-preset-btn" onclick="applyDatePreset('week_next')">Próxima Semana</button>
+                <button type="button" class="date-preset-btn" onclick="applyDatePreset('weekend')">Fim de Semana (Sex-Seg)</button>
+                <button type="button" class="date-preset-btn" onclick="applyDatePreset('days15')">15 Dias</button>
+              </div>
+            </div>
+
+            <div class="form-group full-width">
+              <label for="period">Descrição da Vigência / Turno (Opcional - preenchido automaticamente com base nas datas)</label>
+              <input type="text" id="period" placeholder="Ex: 03/11 a 10/11 • Noturno e Finais de Semana">
             </div>
 
             <div class="form-group">
               <label for="secondary">Plantonista Reserva / Apoio (Opcional)</label>
-              <input type="text" id="secondary" placeholder="Ex: Marcos Santos (Backup)">
+              <input type="text" id="secondary" placeholder="Ex: João Paulo (Backup) ou Ramal 253">
             </div>
 
-            <div class="form-group full-width">
+            <div class="form-group">
               <label for="notes">Instruções / Observações Adicionais</label>
-              <input type="text" id="notes" placeholder="Ex: Chamados de emergência e apoio aos setores assistenciais hospitalares">
+              <input type="text" id="notes" placeholder="Ex: Chamados emergenciais e suporte aos sistemas assistenciais">
             </div>
 
             <div class="form-group full-width">
               <label class="checkbox-label" for="dutyActive">
                 <input type="checkbox" id="dutyActive" checked>
-                <span>Ativar exibição do plantonista no Portal Principal</span>
+                <span>Habilitar este plantão (ficará ativo automaticamente no período de datas especificado)</span>
               </label>
             </div>
 
             <div class="btn-group">
               <button type="submit" class="btn-success" id="btnSaveDuty">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-                <span>Atualizar Plantão da T.I.</span>
+                <span id="dutySaveBtnText">Salvar Plantão</span>
+              </button>
+              <button type="button" class="btn-secondary" id="btnCancelDutyEdit" style="display:none;" onclick="cancelDutyEdit()">
+                <span>Cancelar Edição</span>
               </button>
             </div>
           </div>
         </form>
+
+        <!-- Tabela de Plantões Cadastrados -->
+        <div style="margin-top: 2rem; border-top: 1px solid #e2e8f0; padding-top: 1.5rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+            <h3 style="font-size: 1.1rem; font-weight: 700; color: #1e293b;">
+              📅 Escalas Programadas (<span id="dutiesCount">0</span>)
+            </h3>
+            <button class="btn-secondary" onclick="fetchPlantaoList()" style="padding: 0.35rem 0.75rem; font-size: 0.85rem;">
+              ↻ Atualizar Escala
+            </button>
+          </div>
+
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 140px;">Status</th>
+                  <th>Técnico Plantonista</th>
+                  <th>Contato</th>
+                  <th>Período do Plantão</th>
+                  <th>Apoio / Reserva</th>
+                  <th style="width: 170px;">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="dutyTableBody">
+                <tr>
+                  <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem;">Carregando escala de plantões...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
       
       <!-- Formulário de Cadastro/Edição de Links -->
@@ -989,7 +1379,8 @@
       document.getElementById('authOverlay').style.display = 'none';
       document.getElementById('dashboardContent').style.display = 'block';
       fetchLinks();
-      fetchPlantao();
+      fetchPlantaoList();
+      setDefaultDutyDates();
     }
 
     function showLogin() {
@@ -1011,49 +1402,373 @@
       showToast('Sessão encerrada com sucesso.');
     }
 
-    // ==================== GERENCIAMENTO DO PLANTÃO DA TI ====================
+    // ==================== GERENCIAMENTO DA ESCALA DE PLANTÃO DA TI ====================
 
-    async function fetchPlantao() {
-      try {
-        const res = await fetch(PLANTAO_URL);
-        if (!res.ok) return;
-        const duty = await res.json();
+    let allDuties = [];
 
-        if (duty) {
-          document.getElementById('technician').value = duty.technician || '';
-          document.getElementById('phone').value = duty.phone || '';
-          document.getElementById('period').value = duty.period || '';
-          document.getElementById('secondary').value = duty.secondary || '';
-          document.getElementById('notes').value = duty.notes || '';
-          
-          const isActive = duty.active === 1 || duty.active === true || duty.active === undefined;
-          document.getElementById('dutyActive').checked = isActive;
-          updateDutyStatusBadge(isActive);
+    // Formatar data YYYY-MM-DD para DD/MM/YYYY
+    function formatBRDate(dateStr) {
+      if (!dateStr) return '';
+      const parts = dateStr.split('-');
+      if (parts.length === 3) {
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      }
+      return dateStr;
+    }
+
+    // Configurar datas padrão no formulário caso estejam vazias
+    function setDefaultDutyDates() {
+      const startEl = document.getElementById('startDate');
+      const endEl = document.getElementById('endDate');
+      if (startEl && !startEl.value) {
+        const now = new Date();
+        const plus7 = new Date();
+        plus7.setDate(now.getDate() + 7);
+
+        const toISO = d => {
+          const y = d.getFullYear();
+          const m = String(d.getMonth() + 1).padStart(2, '0');
+          const day = String(d.getDate()).padStart(2, '0');
+          return `${y}-${m}-${day}`;
+        };
+
+        startEl.value = toISO(now);
+        endEl.value = toISO(plus7);
+        autoGeneratePeriodText();
+      }
+    }
+
+    // Atalhos rápidos para preenchimento de datas
+    function applyDatePreset(type) {
+      const now = new Date();
+      let start = new Date();
+      let end = new Date();
+
+      if (type === 'week_now') {
+        end.setDate(now.getDate() + 7);
+      } else if (type === 'week_next') {
+        start.setDate(now.getDate() + 7);
+        end = new Date(start);
+        end.setDate(start.getDate() + 7);
+      } else if (type === 'weekend') {
+        const day = now.getDay(); // 0 Dom, 5 Sex, 6 Sab
+        const daysToFriday = (5 - day + 7) % 7 || 7;
+        start.setDate(now.getDate() + daysToFriday);
+        end = new Date(start);
+        end.setDate(start.getDate() + 3); // Sexta até Segunda
+      } else if (type === 'days15') {
+        end.setDate(now.getDate() + 15);
+      }
+
+      const toISO = d => {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+      };
+
+      document.getElementById('startDate').value = toISO(start);
+      document.getElementById('endDate').value = toISO(end);
+      autoGeneratePeriodText(true);
+    }
+
+    // Gerar automaticamente o texto da vigência a partir das datas
+    function autoGeneratePeriodText(force = false) {
+      const sVal = document.getElementById('startDate').value;
+      const eVal = document.getElementById('endDate').value;
+      const periodInput = document.getElementById('period');
+
+      if (sVal && eVal) {
+        const sParts = sVal.split('-');
+        const eParts = eVal.split('-');
+        const sBR = `${sParts[2]}/${sParts[1]}`;
+        const eBR = `${eParts[2]}/${eParts[1]}`;
+
+        if (force || !periodInput.value || periodInput.dataset.autogenerated === 'true') {
+          periodInput.value = `${sBR} a ${eBR} • Noturno e Fins de Semana`;
+          periodInput.dataset.autogenerated = 'true';
         }
-      } catch (err) {
-        console.error('Erro ao carregar dados do plantão:', err);
       }
     }
 
-    function updateDutyStatusBadge(active) {
-      const badge = document.getElementById('dutyStatusBadge');
-      if (active) {
-        badge.textContent = 'Exibindo no Portal';
-        badge.style.background = '#ecfdf5';
-        badge.style.color = '#059669';
-        badge.style.borderColor = '#a7f3d0';
-      } else {
-        badge.textContent = 'Oculto no Portal';
-        badge.style.background = '#fef2f2';
-        badge.style.color = '#dc2626';
-        badge.style.borderColor = '#fecaca';
-      }
-    }
-
-    document.getElementById('dutyActive').addEventListener('change', (e) => {
-      updateDutyStatusBadge(e.target.checked);
+    document.getElementById('startDate').addEventListener('change', () => autoGeneratePeriodText());
+    document.getElementById('endDate').addEventListener('change', () => autoGeneratePeriodText());
+    document.getElementById('period').addEventListener('input', () => {
+      document.getElementById('period').dataset.autogenerated = 'false';
     });
 
+    // Carregar todas as escalas de plantão do servidor
+    async function fetchPlantaoList() {
+      try {
+        const res = await fetch(`${BASE_URL}/api/plantoes`);
+        if (!res.ok) throw new Error('Falha ao obter lista de plantões');
+        const data = await res.json();
+
+        allDuties = data.items || [];
+
+        // Atualizar Mini Estatísticas
+        document.getElementById('statDutyTotal').textContent = data.total || 0;
+        document.getElementById('statDutyCurrent').textContent = data.current_count || 0;
+        document.getElementById('statDutyScheduled').textContent = data.scheduled_count || 0;
+        document.getElementById('statDutyExpired').textContent = data.expired_count || 0;
+        document.getElementById('dutiesCount').textContent = data.total || 0;
+
+        // Atualizar Box de Status em Tempo Real
+        updateLiveDutyBox(allDuties, data.today);
+
+        // Renderizar Tabela
+        renderDutyTable(allDuties, data.today);
+
+      } catch (err) {
+        console.error('Erro ao carregar escalas de plantão:', err);
+      }
+    }
+
+    // Atualizar Widget de Status em Tempo Real
+    function updateLiveDutyBox(items, today) {
+      const box = document.getElementById('dutyLiveBox');
+      const title = document.getElementById('dutyLiveTitle');
+      const name = document.getElementById('dutyLiveName');
+      const period = document.getElementById('dutyLivePeriod');
+      const phone = document.getElementById('dutyLivePhone');
+      const secondary = document.getElementById('dutyLiveSecondary');
+      const whatsAppBtn = document.getElementById('dutyLiveWhatsApp');
+      const avatar = document.getElementById('dutyLiveAvatar');
+
+      // Buscar o plantão com status 'vigente'
+      const current = items.find(i => i.status === 'vigente');
+
+      if (current) {
+        box.className = 'duty-live-box active-duty';
+        title.innerHTML = `<span class="pulse-dot-green"></span> Plantonista Ativo Hoje no Portal`;
+        name.textContent = current.technician;
+
+        let remText = '';
+        if (current.days_remaining === 0) remText = '• <strong>Vence Hoje!</strong>';
+        else if (current.days_remaining === 1) remText = '• Vence amanhã';
+        else if (current.days_remaining > 1) remText = `• Vence em ${current.days_remaining} dias`;
+
+        period.innerHTML = `Período: ${formatBRDate(current.start_date)} até ${formatBRDate(current.end_date)} ${remText}`;
+        phone.textContent = `Contato: ${current.phone}`;
+        secondary.textContent = current.secondary ? `| Apoio: ${current.secondary}` : '';
+
+        // WhatsApp
+        const digits = (current.phone || '').replace(/\D/g, '');
+        if (digits.length >= 10) {
+          const fullNum = digits.startsWith('55') ? digits : `55${digits}`;
+          whatsAppBtn.href = `https://wa.me/${fullNum}`;
+          whatsAppBtn.style.display = 'inline-flex';
+        } else {
+          whatsAppBtn.style.display = 'none';
+        }
+      } else {
+        // Sem plantão ativo hoje
+        box.className = 'duty-live-box no-duty';
+        title.innerHTML = `⚠️ Nenhum Plantonista Ativo Hoje (${formatBRDate(today)})`;
+
+        // Verificar se há um próximo agendado
+        const next = items.find(i => i.status === 'agendado');
+        if (next) {
+          name.textContent = `Próximo plantão: ${next.technician}`;
+          period.innerHTML = `Inicia em ${formatBRDate(next.start_date)} (em ${next.days_until_start} dias) até ${formatBRDate(next.end_date)}`;
+          phone.textContent = `Contato: ${next.phone}`;
+          secondary.textContent = next.secondary ? `| Apoio: ${next.secondary}` : '';
+        } else {
+          name.textContent = 'Nenhum plantão ativo no momento';
+          period.textContent = 'Não há escalas programadas vigentes para a data de hoje.';
+          phone.textContent = 'Para emergências da TI, acione o Ramal 253.';
+          secondary.textContent = '';
+        }
+
+        whatsAppBtn.style.display = 'none';
+      }
+    }
+
+    // Renderizar Tabela de Escalas de Plantões
+    function renderDutyTable(items, today) {
+      const tbody = document.getElementById('dutyTableBody');
+      tbody.innerHTML = '';
+
+      if (items.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+              Nenhum plantão cadastrado. Utilize o formulário acima para registrar técnicos e períodos.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      items.forEach(item => {
+        const tr = document.createElement('tr');
+
+        // Status badge
+        let statusBadge = '';
+        if (item.status === 'vigente') {
+          let rem = '';
+          if (item.days_remaining === 0) rem = ' (Hoje)';
+          else if (item.days_remaining > 0) rem = ` (${item.days_remaining}d)`;
+          statusBadge = `<span class="status-pill vigente"><span class="pulse-dot-green"></span> Vigente${rem}</span>`;
+        } else if (item.status === 'agendado') {
+          statusBadge = `<span class="status-pill agendado">Agendado (${item.days_until_start}d)</span>`;
+        } else if (item.status === 'vencido') {
+          statusBadge = `<span class="status-pill vencido">Vencido</span>`;
+        } else {
+          statusBadge = `<span class="status-pill inativo">Inativo</span>`;
+        }
+
+        // Period display
+        const periodStr = `${formatBRDate(item.start_date)} a ${formatBRDate(item.end_date)}`;
+        const extraPeriodDesc = item.period ? `<div style="font-size: 0.775rem; color: #64748b;">${escapeHtml(item.period)}</div>` : '';
+
+        // Notes tooltip / subtext
+        const notesSub = item.notes ? `<div style="font-size: 0.75rem; color: #94a3b8; font-style: italic;">${escapeHtml(item.notes)}</div>` : '';
+
+        tr.innerHTML = `
+          <td>${statusBadge}</td>
+          <td>
+            <strong>${escapeHtml(item.technician)}</strong>
+            ${notesSub}
+          </td>
+          <td>
+            <span>${escapeHtml(item.phone)}</span>
+          </td>
+          <td>
+            <strong>${periodStr}</strong>
+            ${extraPeriodDesc}
+          </td>
+          <td>${item.secondary ? escapeHtml(item.secondary) : '<span style="color:#94a3b8;">—</span>'}</td>
+          <td>
+            <button class="btn-edit" onclick="editDuty(${item.id})" title="Editar este plantão">
+              ✏️
+            </button>
+            <button class="btn-toggle-active" onclick="toggleDutyActive(${item.id})" title="Alternar status ativo/inativo">
+              ${item.active === 1 ? '⏸️ Desativar' : '▶️ Ativar'}
+            </button>
+            <button class="btn-danger" onclick="deleteDuty(${item.id}, '${escapeHtml(item.technician)}')" title="Excluir plantão">
+              🗑️
+            </button>
+          </td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Modo Edição de Plantão
+    function editDuty(id) {
+      const item = allDuties.find(d => d.id === id);
+      if (!item) return;
+
+      document.getElementById('dutyId').value = item.id;
+      document.getElementById('technician').value = item.technician || '';
+      document.getElementById('phone').value = item.phone || '';
+      document.getElementById('startDate').value = item.start_date || '';
+      document.getElementById('endDate').value = item.end_date || '';
+      document.getElementById('period').value = item.period || '';
+      document.getElementById('period').dataset.autogenerated = 'false';
+      document.getElementById('secondary').value = item.secondary || '';
+      document.getElementById('notes').value = item.notes || '';
+      document.getElementById('dutyActive').checked = (item.active === 1 || item.active === true);
+
+      document.getElementById('dutyFormTitle').textContent = `✏️ Editando Plantão: ${item.technician} (ID #${item.id})`;
+      document.getElementById('dutySaveBtnText').textContent = 'Salvar Alterações';
+      document.getElementById('btnCancelDutyEdit').style.display = 'inline-flex';
+
+      const notice = document.getElementById('dutyEditNotice');
+      notice.style.display = 'flex';
+      document.getElementById('dutyEditNoticeText').innerHTML = `Modo de edição ativo para o plantonista <strong>${escapeHtml(item.technician)}</strong>. Altere as datas ou dados e clique em "Salvar Alterações".`;
+
+      document.getElementById('dutyForm').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Cancelar Modo Edição
+    function cancelDutyEdit() {
+      document.getElementById('dutyId').value = '';
+      document.getElementById('dutyForm').reset();
+      document.getElementById('dutyActive').checked = true;
+      document.getElementById('dutyFormTitle').textContent = '➕ Cadastrar Novo Plantão na Escala';
+      document.getElementById('dutySaveBtnText').textContent = 'Salvar Plantão';
+      document.getElementById('btnCancelDutyEdit').style.display = 'none';
+      document.getElementById('dutyEditNotice').style.display = 'none';
+      setDefaultDutyDates();
+    }
+
+    // Alternar Ativo/Inativo
+    async function toggleDutyActive(id) {
+      const token = getToken();
+      if (!token) {
+        showLogin();
+        return;
+      }
+
+      try {
+        const res = await fetch(`${PLANTAO_URL}/${id}/toggle`, {
+          method: 'PATCH',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (res.status === 401) {
+          clearToken();
+          showLogin();
+          alert('Sessão expirada. Faça login novamente.');
+          return;
+        }
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error || 'Erro ao alterar status.');
+        }
+
+        showToast('Status do plantão atualizado!');
+        fetchPlantaoList();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    // Excluir Plantão
+    async function deleteDuty(id, techName) {
+      if (!confirm(`Deseja realmente excluir a escala de "${techName}"?`)) {
+        return;
+      }
+
+      const token = getToken();
+      if (!token) {
+        showLogin();
+        return;
+      }
+
+      try {
+        const res = await fetch(`${PLANTAO_URL}/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (res.status === 401) {
+          clearToken();
+          showLogin();
+          alert('Sessão expirada. Faça login novamente.');
+          return;
+        }
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error || 'Erro ao excluir escala.');
+        }
+
+        showToast('Escala de plantão excluída com sucesso!');
+        if (document.getElementById('dutyId').value == id) {
+          cancelDutyEdit();
+        }
+        fetchPlantaoList();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    // Envio do Formulário de Plantão (Criação ou Edição)
     document.getElementById('dutyForm').addEventListener('submit', async (e) => {
       e.preventDefault();
 
@@ -1063,9 +1778,25 @@
         return;
       }
 
+      const dutyId = document.getElementById('dutyId').value;
+      const sDate = document.getElementById('startDate').value;
+      const eDate = document.getElementById('endDate').value;
+
+      if (!sDate || !eDate) {
+        alert('Por favor, selecione as datas de início e término do plantão.');
+        return;
+      }
+
+      if (sDate > eDate) {
+        alert('A data de início não pode ser posterior à data de término do plantão.');
+        return;
+      }
+
       const payload = {
         technician: document.getElementById('technician').value.trim(),
         phone: document.getElementById('phone').value.trim(),
+        start_date: sDate,
+        end_date: eDate,
         period: document.getElementById('period').value.trim(),
         secondary: document.getElementById('secondary').value.trim(),
         notes: document.getElementById('notes').value.trim(),
@@ -1073,12 +1804,17 @@
       };
 
       const btn = document.getElementById('btnSaveDuty');
+      const btnText = document.getElementById('dutySaveBtnText');
+      const oldText = btnText.textContent;
       btn.disabled = true;
-      btn.innerHTML = 'Salvando...';
+      btnText.textContent = 'Salvando...';
 
       try {
-        const res = await fetch(PLANTAO_URL, {
-          method: 'PUT',
+        const url = dutyId ? `${PLANTAO_URL}/${dutyId}` : PLANTAO_URL;
+        const method = dutyId ? 'PUT' : 'POST';
+
+        const res = await fetch(url, {
+          method: method,
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
@@ -1095,20 +1831,18 @@
 
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}));
-          throw new Error(errData.error || 'Erro ao atualizar escala de plantão.');
+          throw new Error(errData.error || 'Erro ao salvar escala de plantão.');
         }
 
-        showToast('Escala de Plantão atualizada com sucesso!');
-        updateDutyStatusBadge(payload.active === 1);
+        showToast(dutyId ? 'Escala de plantão atualizada com sucesso!' : 'Novo plantão adicionado à escala!');
+        cancelDutyEdit();
+        fetchPlantaoList();
       } catch (err) {
         console.error(err);
         alert('Erro ao salvar plantão: ' + err.message);
       } finally {
         btn.disabled = false;
-        btn.innerHTML = `
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-          <span>Atualizar Plantão da T.I.</span>
-        `;
+        btnText.textContent = oldText;
       }
     });
 

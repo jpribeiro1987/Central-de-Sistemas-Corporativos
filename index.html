@@ -973,9 +973,9 @@
           </div>
           <div class="duty-details">
             <div class="duty-header-row">
-              <span class="duty-pill">
+              <span class="duty-pill" id="dutyPillBadge">
                 <span class="pulse-indicator"></span>
-                Plantão T.I. Ativo
+                <span id="dutyPillText">Plantão T.I. Ativo</span>
               </span>
               <span class="duty-period" id="dutyPeriodText">Vigência</span>
             </div>
@@ -1103,52 +1103,87 @@
       setupSearch();
     });
 
+    // Formatar data YYYY-MM-DD para DD/MM/YYYY
+    function formatBRDate(dateStr) {
+      if (!dateStr) return '';
+      const parts = dateStr.split('-');
+      if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      return dateStr;
+    }
+
     // ==================== CARREGAMENTO DO PLANTÃO DA TI ====================
     async function loadPlantaoData() {
       const wrapper = document.getElementById('dutyBannerWrapper');
+      const pillBadge = document.getElementById('dutyPillBadge');
+      const pillText = document.getElementById('dutyPillText');
+      const techName = document.getElementById('dutyTechName');
+      const periodText = document.getElementById('dutyPeriodText');
+      const notesText = document.getElementById('dutyNotesText');
+      const secWrapper = document.getElementById('dutySecondaryWrapper');
+      const contactLink = document.getElementById('dutyContactLink');
+      const phoneText = document.getElementById('dutyPhoneText');
+
       try {
         const res = await fetch(PLANTAO_URL);
         if (!res.ok) return;
         const duty = await res.json();
 
-        // Se ativo e tiver técnico informado, exibe o banner
-        if (duty && (duty.active === 1 || duty.active === true) && duty.technician) {
-          document.getElementById('dutyTechName').textContent = duty.technician;
-          document.getElementById('dutyPeriodText').textContent = duty.period ? `• ${duty.period}` : '';
-          document.getElementById('dutyNotesText').textContent = duty.notes || 'Em caso de urgência, entre em contato imediatamente com o plantonista.';
+        // 1. Caso haja plantonista ativo e vigente hoje
+        if (duty && duty.is_current && duty.technician) {
+          techName.textContent = duty.technician;
+
+          // Cálculo e texto de vencimento amigável
+          let remText = '';
+          if (duty.days_remaining === 0) remText = ' • Vence hoje!';
+          else if (duty.days_remaining === 1) remText = ' • Vence amanhã';
+          else if (duty.days_remaining > 1) remText = ` • Vence em ${duty.days_remaining} dias`;
+
+          const periodBase = duty.period || (duty.start_date && duty.end_date ? `${formatBRDate(duty.start_date)} a ${formatBRDate(duty.end_date)}` : '');
+          periodText.textContent = periodBase ? `• ${periodBase}${remText}` : '';
+          notesText.textContent = duty.notes || 'Em caso de urgência hospitalar, entre em contato imediatamente com o plantonista.';
+
+          pillBadge.style.background = '#eff6ff';
+          pillBadge.style.color = '#1d4ed8';
+          pillBadge.style.borderColor = '#bfdbfe';
+          pillBadge.innerHTML = `<span class="pulse-indicator"></span><span id="dutyPillText">Plantão T.I. Ativo</span>`;
 
           // Plantonista de Apoio
-          const secWrapper = document.getElementById('dutySecondaryWrapper');
           if (duty.secondary && duty.secondary.trim()) {
-            document.getElementById('dutySecondaryText').querySelector('span').textContent = `Apoio: ${duty.secondary}`;
+            secWrapper.querySelector('span span').textContent = `Apoio: ${duty.secondary}`;
             secWrapper.style.display = 'block';
           } else {
             secWrapper.style.display = 'none';
           }
 
-          // Telefone / WhatsApp
-          const contactLink = document.getElementById('dutyContactLink');
-          const phoneText = document.getElementById('dutyPhoneText');
-          const phoneRaw = duty.phone || '';
+          // Telefone / WhatsApp de Contato
+          setupContactButton(contactLink, phoneText, duty.phone);
+          wrapper.style.display = 'block';
 
-          if (phoneRaw) {
-            phoneText.textContent = phoneRaw;
-            // Extrai somente números para link WhatsApp
-            const digits = phoneRaw.replace(/\D/g, '');
-            if (digits.length >= 10) {
-              const fullNumber = digits.startsWith('55') ? digits : `55${digits}`;
-              contactLink.href = `https://wa.me/${fullNumber}?text=Ol%C3%A1%2C+preciso+de+suporte+do+Plant%C3%A3o+de+T.I.+do+Hospital+Santo+Ant%C3%B4nio.`;
-              contactLink.title = `Abrir WhatsApp para ${phoneRaw}`;
-            } else {
-              contactLink.href = `tel:${phoneRaw}`;
-              contactLink.title = `Ligar para ${phoneRaw}`;
-            }
-            contactLink.style.display = 'inline-flex';
+        // 2. Caso o plantão tenha vencido ou não haja plantonista hoje, mas há um próximo agendado
+        } else if (duty && !duty.is_current && duty.next) {
+          const next = duty.next;
+          techName.textContent = `Próximo: ${next.technician}`;
+          
+          const nextStartStr = formatBRDate(next.start_date);
+          periodText.textContent = `• Início em ${nextStartStr} (${next.period || 'Noturno e Finais de Semana'})`;
+          notesText.textContent = 'Sem plantonista em escala hoje. Em caso de ocorrência emergencial, acione o Ramal 253 ou a Coordenação de T.I.';
+
+          pillBadge.style.background = '#fef3c7';
+          pillBadge.style.color = '#92400e';
+          pillBadge.style.borderColor = '#fde68a';
+          pillBadge.innerHTML = `<span style="width:6px; height:6px; border-radius:50%; background:#d97706; display:inline-block;"></span><span id="dutyPillText">Próximo Plantão Agendado</span>`;
+
+          if (next.secondary && next.secondary.trim()) {
+            secWrapper.querySelector('span span').textContent = `Apoio: ${next.secondary}`;
+            secWrapper.style.display = 'block';
           } else {
-            contactLink.style.display = 'none';
+            secWrapper.style.display = 'none';
           }
 
+          setupContactButton(contactLink, phoneText, next.phone || 'Ramal 253');
           wrapper.style.display = 'block';
+
+        // 3. Sem escala e sem agendamentos
         } else {
           wrapper.style.display = 'none';
         }
@@ -1157,6 +1192,33 @@
         wrapper.style.display = 'none';
       }
     }
+
+    // Configurar botão de contato com link para WhatsApp ou Chamada Telefônica
+    function setupContactButton(linkEl, textEl, phoneRaw) {
+      if (!phoneRaw || !phoneRaw.trim()) {
+        linkEl.style.display = 'none';
+        return;
+      }
+
+      textEl.textContent = phoneRaw;
+      const digits = phoneRaw.replace(/\D/g, '');
+      if (digits.length >= 10) {
+        const fullNumber = digits.startsWith('55') ? digits : `55${digits}`;
+        linkEl.href = `https://wa.me/${fullNumber}?text=Ol%C3%A1%2C+preciso+de+suporte+do+Plant%C3%A3o+de+T.I.+do+Hospital+Santo+Ant%C3%B4nio.`;
+        linkEl.title = `Abrir WhatsApp para ${phoneRaw}`;
+      } else {
+        linkEl.href = `tel:${phoneRaw}`;
+        linkEl.title = `Ligar para ${phoneRaw}`;
+      }
+      linkEl.style.display = 'inline-flex';
+    }
+
+    // Auto-atualização periódica (verifica a cada 60s se a data virou e troca o plantonista)
+    setInterval(loadPlantaoData, 60000);
+    window.addEventListener('focus', loadPlantaoData);
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) loadPlantaoData();
+    });
 
     // Configuração do Campo de Busca
     function setupSearch() {
