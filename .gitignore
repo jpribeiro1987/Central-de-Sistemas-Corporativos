@@ -2,3 +2,14 @@ node_modules/
 npm-debug.log*
 .DS_Store
 *.log
+
+# SQLite Database & Backups
+*.sqlite
+*.sqlite3
+*.db
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+*.backup
+*.bak
+database.sqlite
